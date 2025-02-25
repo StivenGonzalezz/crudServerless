@@ -2,16 +2,13 @@ service: crud-serverless
 
 frameworkVersion: "3"
 
-# custom:
-#   regioncustom: ${env:AWSREGION}
-#   profilecustom: ${env:AWS_PROFILE}
-#   tablecustom: ${env:DYNAMODB_TABLE}
+useDotenv: true
 
 provider:
   name: aws
   runtime: nodejs20.x
   region: ${env:AWSREGION}
-  profile: stiven
+  profile: ${env:AWSPROFILE}
   apiGateway:
     shouldStartNameWithService: true
   iam:
@@ -24,7 +21,7 @@ provider:
             - dynamodb:DeleteItem
             - dynamodb:Scan
           Resource: 
-            - arn:aws:dynamodb:us-east-2:*:UsersTable
+            - arn:aws:dynamodb:${env:AWSREGION}:*:${env:DYNAMODBTABLE}
 
 plugins:
   - serverless-dotenv-plugin
@@ -66,7 +63,7 @@ resources:
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UsersTable
+        TableName: ${env:DYNAMODBTABLE}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
