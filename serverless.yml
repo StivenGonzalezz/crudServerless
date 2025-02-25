@@ -1,0 +1,76 @@
+service: crud-serverless
+
+frameworkVersion: "3"
+
+# custom:
+#   regioncustom: ${env:AWSREGION}
+#   profilecustom: ${env:AWS_PROFILE}
+#   tablecustom: ${env:DYNAMODB_TABLE}
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${env:AWSREGION}
+  profile: stiven
+  apiGateway:
+    shouldStartNameWithService: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
+          Resource: 
+            - arn:aws:dynamodb:us-east-2:*:UsersTable
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+
+functions:
+
+  helloUser:
+    handler: handler.helloUser
+    events:
+      - http:
+          method: GET 
+          path: /test/{name}
+
+  createUser:
+    handler: handler.createUser
+    events:
+      - http:
+          method: POST 
+          path: /user/create
+
+  deleteUser:
+    handler: handler.deleteUser
+    events:
+      - http:
+          method: DELETE
+          path: /user/delete/{id}
+
+  getAllUsers:
+    handler: handler.getAllUsers
+    events:
+      - http:
+          method: GET
+          path: /users
+
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UsersTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
